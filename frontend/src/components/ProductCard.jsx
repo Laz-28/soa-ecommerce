@@ -1,4 +1,54 @@
-import { ShoppingCart, Star } from "lucide-react";
+import { useState } from "react";
+import {
+  Headphones,
+  ShoppingCart,
+  Smartphone,
+  Star,
+  Watch,
+  Zap
+} from "lucide-react";
+
+function ProductVisual({ product }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  function getProductIcon() {
+    const category = product.category.toLowerCase();
+
+    if (category.includes("audio")) {
+      return <Headphones size={72} strokeWidth={1.3} />;
+    }
+
+    if (category.includes("watch")) {
+      return <Watch size={72} strokeWidth={1.3} />;
+    }
+
+    if (category.includes("power")) {
+      return <Zap size={72} strokeWidth={1.3} />;
+    }
+
+    return <Smartphone size={72} strokeWidth={1.3} />;
+  }
+
+  if (!product.image || imageFailed) {
+    return (
+      <div className="product-image-fallback">
+        {getProductIcon()}
+        <strong>{product.name}</strong>
+        <span>{product.category}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={product.image}
+      alt={product.name}
+      className="product-image"
+      loading="lazy"
+      onError={() => setImageFailed(true)}
+    />
+  );
+}
 
 function ProductCard({ product, addToCart }) {
   const discount = Math.round(
@@ -10,19 +60,21 @@ function ProductCard({ product, addToCart }) {
   return (
     <article className="product-card">
       <div className="product-image-container">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="product-image"
-        />
+        <ProductVisual product={product} />
 
-        <span className="product-badge">{product.badge}</span>
+        <span className="product-badge">
+          {product.badge}
+        </span>
 
-        <span className="discount-label">-{discount}%</span>
+        <span className="discount-label">
+          -{discount}%
+        </span>
       </div>
 
       <div className="product-information">
-        <span className="product-category">{product.category}</span>
+        <span className="product-category">
+          {product.category}
+        </span>
 
         <h3>{product.name}</h3>
 

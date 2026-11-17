@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Header from "../components/Header";
 import Hero from "../components/Hero";
 import ProductCard from "../components/ProductCard";
-
-const PRODUCT_SERVICE_URL = "http://localhost:4002";
+import api from "../services/api";
 
 const categories = [
   "All",
@@ -13,9 +12,15 @@ const categories = [
   "Personal Care"
 ];
 
-function HomePage({ cartCount, addToCart }) {
+function HomePage({
+  cartCount,
+  addToCart,
+  onOpenCart,
+  onOpenOrders
+}) {
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] =
+    useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -25,21 +30,13 @@ function HomePage({ cartCount, addToCart }) {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          `${PRODUCT_SERVICE_URL}/products`
-        );
-
-        if (!response.ok) {
-          throw new Error("Unable to retrieve products");
-        }
-
-        const productData = await response.json();
-        setProducts(productData);
+        const response = await api.get("/products");
+        setProducts(response.data);
       } catch (requestError) {
         console.error(requestError);
 
         setError(
-          "Product Service is unavailable. Ensure it is running on port 4002."
+          "Products are unavailable. Ensure the API Gateway and Product Service are running."
         );
       } finally {
         setLoading(false);
@@ -55,24 +52,36 @@ function HomePage({ cartCount, addToCart }) {
     }
 
     return products.filter(
-      (product) => product.category === selectedCategory
+      (product) =>
+        product.category === selectedCategory
     );
   }, [products, selectedCategory]);
 
   return (
     <div>
-      <Header cartCount={cartCount} />
+      <Header
+        cartCount={cartCount}
+        onOpenCart={onOpenCart}
+        onOpenOrders={onOpenOrders}
+      />
 
       <main>
         <Hero />
 
-        <section className="product-section" id="products">
+        <section
+          className="product-section"
+          id="products"
+        >
           <div className="section-heading">
             <div>
-              <span className="section-label">LIMITED-TIME OFFERS</span>
+              <span className="section-label">
+                LIMITED-TIME OFFERS
+              </span>
+
               <h2>Today’s top deals</h2>
+
               <p>
-                Shop our most popular technology products at
+                Shop our popular technology products at
                 discounted prices.
               </p>
             </div>
@@ -87,7 +96,9 @@ function HomePage({ cartCount, addToCart }) {
                       ? "filter-button active"
                       : "filter-button"
                   }
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() =>
+                    setSelectedCategory(category)
+                  }
                 >
                   {category}
                 </button>
@@ -103,8 +114,10 @@ function HomePage({ cartCount, addToCart }) {
 
           {error && (
             <div className="system-message error-message">
-              <strong>Connection error</strong>
-              <p>{error}</p>
+              <div>
+                <strong>Connection error</strong>
+                <p>{error}</p>
+              </div>
             </div>
           )}
 
@@ -137,7 +150,8 @@ function HomePage({ cartCount, addToCart }) {
           </a>
 
           <p>
-            A service-oriented e-commerce demonstration system.
+            A service-oriented e-commerce demonstration
+            system.
           </p>
         </div>
 
